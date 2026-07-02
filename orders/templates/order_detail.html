@@ -54,7 +54,7 @@
 
                     <h5>
 
-                        {{ item.variant.product.name |floatformat:0|intcomma }} تومان
+                        {{ item.variant.product.name }}
                     </h5>
 
                 </div>
@@ -79,7 +79,7 @@
 
                 <div class="col-md-2">
 
-                    {{ item.price }} تومان
+                    {{ item.price |floatformat:0|intcomma }} تومان
 
                 </div>
 
