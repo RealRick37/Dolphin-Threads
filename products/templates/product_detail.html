@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}
+{{ product.name }}
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+
+    <div class="col-md-6">
+
+    <div class="mb-3 main-image-wrapper">
+    {% if product.image %}
+        <img
+            id="main-image"
+            src="{{ product.image.url }}"
+            class="img-fluid rounded shadow main-product-image"
+            alt="{{ product.name }}"
+        >
+    {% endif %}
+</div>
+
+<div class="d-flex gap-2 flex-wrap gallery-thumbs">
+
+    {% if product.image %}
+        <img
+            src="{{ product.image.url }}"
+            class="thumbnail active-thumb"
+            data-full="{{ product.image.url }}"
+        >
+    {% endif %}
+
+    {% for img in images %}
+        <img
+            src="{{ img.image.url }}"
+            class="thumbnail"
+            data-full="{{ img.image.url }}"
+        >
+    {% endfor %}
+
+</div>
+
+    <div class="d-flex gap-2 flex-wrap">
+
+    
+
+    </div>
+
+</div>
+
+    <div class="col-md-6">
+
+        <div class="d-flex justify-content-between align-items-start">
+            <h1 class="fw-bold">{{ product.name }}</h1>
+
+            {% if user.is_authenticated %}
+                <button
+                    id="wishlist-btn"
+                    class="btn btn-outline-danger btn-sm"
+                    data-product="{{ product.id }}"
+                    title="افزودن به علاقه‌مندی‌ها"
+                >
+                    <i class="bi {% if in_wishlist %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                </button>
+            {% endif %}
+        </div>
+
+        <p class="text-muted">{{ product.brand }}</p>
+
+        <hr>
+
+        <h3 class="text-success">{{ product.price|floatformat:0|intcomma }} تومان</h3>
+
+        <p>{{ product.description }}</p>
+
+        <p>
+            دسته بندی:
+            <span class="badge bg-primary">{{ product.category }}</span>
+        </p>
+
+        {% if avg_rating %}
+            <p>
+                امتیاز:
+                <span class="text-warning">
+                    {% for i in "12345" %}
+                        <i class="bi {% if forloop.counter <= avg_rating %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                    {% endfor %}
+                </span>
+                ({{ avg_rating|floatformat:1 }} از {{ comment_count }} نظر)
+            </p>
+        {% endif %}
+
+        <hr>
+
+        <h5>انتخاب محصول</h5>
+
+        {% for variant in product.variants.all %}
+            <div class="card variant-card mb-2">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-dark">{{ variant.size }}</span>
+                        <span class="badge bg-secondary">{{ variant.color }}</span>
+                    </div>
+                    <div>
+                        {% if variant.stock > 5 %}
+                            <span class="badge bg-success">موجودی: {{ variant.stock }}</span>
+                            <button
+                                class="btn btn-success badge btn-sm add-to-cart-btn"
+                                data-variant="{{ variant.id }}"
+                            >
+                                افزودن به سبد خرید
+                            </button>
+                        {% elif variant.stock > 0 %}
+                            <span class="badge bg-warning text-dark">فقط {{ variant.stock }} عدد باقی مانده</span>
+                            <a href="{% url 'add_to_cart' variant.id %}" class="badge btn btn-success btn-sm">
+                                افزودن به سبد خرید
+                            </a>
+                        {% else %}
+                            <span class="badge bg-danger">ناموجود</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-warning">هیچ موجودی ثبت نشده است.</div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<hr class="my-5">
+
+<div class="row">
+
+    <div class="col-md-8">
+
+        <h4 class="fw-bold mb-4">نظرات کاربران</h4>
+
+        {% for comment in comments %}
+            <div class="card comment-card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold">{{ comment.user.username }}</span>
+                        <span class="text-warning">
+                            {% for i in "12345" %}
+                                <i class="bi {% if forloop.counter <= comment.rating %}bi-star-fill{% else %}bi-star{% endif %} small"></i>
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <p class="mt-2 mb-1">{{ comment.text }}</p>
+                    <small class="text-muted">{{ comment.created_at|date:"Y/m/d" }}</small>
+                    {% if user == comment.user %}
+
+                        <a
+                            href="{% url 'edit_comment' comment.id %}"
+                            class="btn btn-sm btn-warning"
+                        >
+                            ویرایش
+                        </a>
+
+                        <form
+                            method="post"
+                            action="{% url 'delete_comment' comment.id %}"
+                            class="d-inline"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                class="btn btn-sm btn-danger"
+                            >
+                                حذف
+                            </button>
+
+                        </form>
+
+                        {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-muted">هنوز نظری ثبت نشده است.</p>
+        {% endfor %}
+
+        {% if comments.has_other_pages %}
+
+<nav class="mt-4">
+
+    <ul class="pagination justify-content-center">
+
+        {% if comments.has_previous %}
+
+            <li class="page-item">
+
+                <a
+                    class="page-link"
+                    href="?comment_page={{ comments.previous_page_number }}"
+                >
+                    قبلی
+                </a>
+
+            </li>
+
+        {% endif %}
+
+        {% for num in comments.paginator.page_range %}
+
+            <li
+                class="page-item {% if comments.number == num %}active{% endif %}"
+            >
+
+                <a
+                    class="page-link"
+                    href="?comment_page={{ num }}"
+                >
+                    {{ num }}
+                </a>
+
+            </li>
+
+        {% endfor %}
+
+        {% if comments.has_next %}
+
+            <li class="page-item">
+
+                <a
+                    class="page-link"
+                    href="?comment_page={{ comments.next_page_number }}"
+                >
+                    بعدی
+                </a>
+
+            </li>
+
+        {% endif %}
+
+    </ul>
+
+</nav>
+
+{% endif %}
+
+    </div>
+
+    <div class="col-md-4">
+
+        {% if user.is_authenticated %}
+
+            {% if user_has_commented %}
+                <div class="alert alert-info">شما قبلاً نظر خود را ثبت کرده‌اید.</div>
+                
+            {% else %}
+                <h5 class="fw-bold mb-3">ثبت نظر</h5>
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post" action="{% url 'add_comment' product.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+
+                                <label class="form-label fw-bold">
+                                    امتیاز شما
+                                </label>
+
+                                <div class="rating-stars">
+
+                                    <input type="radio" name="rating" value="5" id="star5" required>
+                                    <label for="star5">
+                                        <i class="bi bi-star-fill"></i>
+                                    </label>
+
+                                    <input type="radio" name="rating" value="4" id="star4">
+                                    <label for="star4">
+                                        <i class="bi bi-star-fill"></i>
+                                    </label>
+
+                                    <input type="radio" name="rating" value="3" id="star3">
+                                    <label for="star3">
+                                        <i class="bi bi-star-fill"></i>
+                                    </label>
+
+                                    <input type="radio" name="rating" value="2" id="star2">
+                                    <label for="star2">
+                                        <i class="bi bi-star-fill"></i>
+                                    </label>
+
+                                    <input type="radio" name="rating" value="1" id="star1">
+                                    <label for="star1">
+                                        <i class="bi bi-star-fill"></i>
+                                    </label>
+
+                                </div>
+
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">متن نظر</label>
+                                <textarea
+                                    class="form-control"
+                                    name="text"
+                                    rows="4"
+                                    placeholder="نظر خود را بنویسید..."
+                                    required
+                                ></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                ثبت نظر
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <div class="alert alert-warning">
+                برای ثبت نظر <a href="{% url 'login' %}">وارد شوید</a>.
+            </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const btn = document.getElementById("wishlist-btn");
+
+    if (btn) {
+        btn.addEventListener("click", function () {
+            const productId = this.dataset.product;
+
+            fetch(`/products/${productId}/wishlist/`, {
+                method: "POST",
+                headers: {
+                    "x-requested-with": "XMLHttpRequest",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                const icon = btn.querySelector("i");
+                if (data.in_wishlist) {
+                    icon.classList.replace("bi-heart", "bi-heart-fill");
+                } else {
+                    icon.classList.replace("bi-heart-fill", "bi-heart");
+                }
+
+                const badge = document.getElementById("wishlist-badge");
+                if (badge) {
+                    badge.innerText = data.wishlist_count;
+                    badge.classList.toggle("d-none", data.wishlist_count === 0);
+                } else if (data.wishlist_count > 0) {
+
+                    const link = document.querySelector('a[href*="wishlist"]');
+                    if (link) {
+                        const newBadge = document.createElement("span");
+                        newBadge.id = "wishlist-badge";
+                        newBadge.className = "position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger";
+                        newBadge.innerText = data.wishlist_count;
+                        link.appendChild(newBadge);
+                    }
+                }
+            });
+        });
+    }
+
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.querySelectorAll(".thumbnail").forEach(img => {
+
+        img.addEventListener("click", function () {
+
+            document.getElementById("main-image").src =
+                this.dataset.full;
+
+        });
+
+    });
+
+});
+document.addEventListener("DOMContentLoaded", function () {
+
+    const mainImage = document.getElementById("main-image");
+    const thumbnails = document.querySelectorAll(".thumbnail");
+
+    thumbnails.forEach(img => {
+
+        img.addEventListener("click", function () {
+
+            const newSrc = this.dataset.full;
+
+
+            thumbnails.forEach(t => t.classList.remove("active-thumb"));
+            this.classList.add("active-thumb");
+
+
+            mainImage.classList.add("fade-out");
+
+            setTimeout(() => {
+                mainImage.src = newSrc;
+                mainImage.classList.remove("fade-out");
+                mainImage.classList.add("fade-in");
+            }, 200);
+
+            setTimeout(() => {
+                mainImage.classList.remove("fade-in");
+            }, 500);
+
+        });
+
+    });
+
+});
+</script>
+{% endblock %} 

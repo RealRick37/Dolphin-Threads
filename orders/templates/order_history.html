@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}
+سفارش‌های من
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <h2>
+        سفارش‌های من
+    </h2>
+
+    <a
+        href="{% url 'profile' %}"
+        class="btn btn-outline-dark"
+    >
+        پروفایل من
+    </a>
+
+</div>
+
+{% for order in orders %}
+
+    <div class="card shadow-sm border-0 mb-3">
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-3">
+
+                    <strong>
+                        سفارش #{{ order.id }}
+                    </strong>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    {{ order.created_at|date:"Y/m/d" }}
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <span class="badge bg-success">
+
+                        {{ order.status }}
+
+                    </span>
+
+                </div>
+
+                <div class="col-md-3 text-end">
+
+                    <a
+                        href="{% url 'order_detail' order.id %}"
+                        class="btn btn-sm btn-dark"
+                    >
+                        مشاهده
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% empty %}
+
+    <div class="alert alert-info">
+
+        هنوز سفارشی ثبت نشده است.
+
+    </div>
+
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}
+ویرایش نظر
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+```
+<div class="col-md-6">
+
+    <div class="card shadow">
+
+        <div class="card-body">
+
+            <h3 class="mb-4">
+                ویرایش نظر
+            </h3>
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        امتیاز
+                    </label>
+
+                    <select
+                        name="rating"
+                        class="form-select"
+                    >
+
+                        {% for i in "12345" %}
+
+                            <option
+                                value="{{ forloop.counter }}"
+                                {% if comment.rating == forloop.counter %}
+                                selected
+                                {% endif %}
+                            >
+                                {{ forloop.counter }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        متن نظر
+                    </label>
+
+                    <textarea
+                        name="text"
+                        class="form-control"
+                        rows="5"
+                    >{{ comment.text }}</textarea>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    ذخیره تغییرات
+                </button>
+
+                <a
+                    href="{% url 'product_detail' comment.product.id %}"
+                    class="btn btn-secondary"
+                >
+                    انصراف
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+{% endblock %}

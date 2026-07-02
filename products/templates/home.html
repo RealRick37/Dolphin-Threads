@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}
+فروشگاه لباس
+{% endblock %}
+
+{% block content %}
+
+<section class="hero-section rounded overflow-hidden mb-5">
+
+    <div class="row align-items-center g-0">
+
+        <div class="col-md-6 p-5">
+
+            <span class="badge bg-warning text-dark mb-3">
+                کالکشن جدید 2026
+            </span>
+
+            <h1 class="display-4 fw-bold">
+
+                استایل خودت رو بساز
+
+            </h1>
+
+            <p class="lead my-4">
+
+                جدیدترین لباس‌ها، برندهای محبوب و بهترین قیمت‌ها.
+
+            </p>
+
+            <div class="d-flex gap-2">
+
+                <a
+                    href="{% url 'product_list' %}"
+                    class="btn btn-primary btn-lg"
+                >
+                    مشاهده محصولات
+                </a>
+
+                <a
+                    href="#latest-products"
+                    class="btn btn-outline-light btn-lg"
+                >
+                    جدیدترین‌ها
+                </a>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+
+    <div
+        id="heroCarousel"
+        class="carousel slide"
+        data-bs-ride="carousel"
+    >
+
+        <div class="carousel-inner rounded">
+
+            <div class="carousel-item active">
+
+                <img
+                    src="/media/products/hero3.png"
+                    class="d-block w-100 hero-image"
+                    alt=""
+                >
+
+            </div>
+
+            <div class="carousel-item">
+
+                <img
+                    src="/media/products/love1.jpg"
+                    class="d-block w-100 hero-image"
+                    alt=""
+                >
+
+            </div>
+
+            <div class="carousel-item">
+
+                <img
+                    src="/media/products/hero2.jpg"
+                    class="d-block w-100 hero-image"
+                    alt=""
+                >
+
+            </div>
+
+
+        </div>
+
+        <button
+            class="carousel-control-prev"
+            type="button"
+            data-bs-target="#heroCarousel"
+            data-bs-slide="prev"
+        >
+
+            <span class="carousel-control-prev-icon"></span>
+
+        </button>
+
+        <button
+            class="carousel-control-next"
+            type="button"
+            data-bs-target="#heroCarousel"
+            data-bs-slide="next"
+        >
+
+            <span class="carousel-control-next-icon"></span>
+
+        </button>
+
+    </div>
+
+</div>
+
+    </div>
+
+</section>
+
+<h2 class="mb-4">
+    دسته‌بندی‌ها
+</h2>
+
+<div class="row g-3 mb-5">
+
+    {% for category in categories %}
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm category-card">
+
+                <div class="card-body text-center">
+
+                    <a
+                        href="{% url 'product_list' %}?category={{ category.slug }}"
+                        class="text-decoration-none text-dark"
+                    >
+
+                        <h5>
+
+                            {{ category.name }}
+
+                        </h5>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+<h2 class="mb-4">
+    برندهای محبوب
+</h2>
+
+<div class="row g-3 mb-5">
+
+    {% for brand in brands %}
+
+        <div class="col-md-3">
+
+            <a
+                href="{% url 'product_list' %}?brand={{ brand.slug }}"
+                class="text-decoration-none"
+            >
+
+                <div class="card shadow-sm text-center brand-card">
+
+                    <div class="card-body">
+
+                        <h5 class="text-dark">
+
+                            {{ brand.name }}
+
+                        </h5>
+
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+<h2
+    id="latest-products"
+    class="mb-4"
+>
+    جدیدترین محصولات
+</h2>
+
+<div class="row g-4">
+
+    {% for product in latest_products %}
+
+        <div class="col-md-3">
+
+            <div class="card product-card h-100 border-0 shadow-sm">
+
+                {% if product.image %}
+
+                    <img
+                        src="{{ product.image.url }}"
+                        class="card-img-top product-image"
+                        alt="{{ product.name }}"
+                    >
+
+                {% endif %}
+
+                <div class="card-body">
+
+                    <h5>
+                        {{ product.name }}
+                    </h5>
+
+                    <p>
+                        {{ product.price|floatformat:0|intcomma }} تومان
+                    </p>
+
+                </div>
+
+                <div class="card-footer bg-white">
+
+                    <a
+                        href="{% url 'product_detail' product.id %}"
+                        class="btn btn-dark w-100"
+                    >
+                        مشاهده
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

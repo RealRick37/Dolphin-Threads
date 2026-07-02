@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}
+سفارش {{ order.id }}
+{% endblock %}
+
+{% block content %}
+
+<div class="card shadow-sm border-0 mb-4">
+
+    <div class="card-body">
+
+        <h2>
+
+            سفارش شماره #{{ order.id }}
+
+        </h2>
+
+        <hr>
+
+        <p>
+
+            <strong>
+                وضعیت:
+            </strong>
+
+            {{ order.status }}
+
+        </p>
+
+        <p>
+
+            <strong>
+                تاریخ:
+            </strong>
+
+            {{ order.created_at }}
+
+        </p>
+
+    </div>
+
+</div>
+
+{% for item in order.items.all %}
+
+    <div class="card shadow-sm border-0 mb-3">
+
+        <div class="card-body">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-4">
+
+                    <h5>
+
+                        {{ item.variant.product.name |floatformat:0|intcomma }} تومان
+                    </h5>
+
+                </div>
+
+                <div class="col-md-2">
+
+                    {{ item.variant.color }}
+
+                </div>
+
+                <div class="col-md-2">
+
+                    {{ item.variant.size }}
+
+                </div>
+
+                <div class="col-md-2">
+
+                    {{ item.quantity }} عدد
+
+                </div>
+
+                <div class="col-md-2">
+
+                    {{ item.price }} تومان
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endfor %}
+
+<a
+    href="{% url 'order_history' %}"
+    class="btn btn-outline-dark"
+>
+    بازگشت به سفارش‌ها
+</a>
+
+{% endblock %}

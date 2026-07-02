@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}
+محصولات
+{% endblock %}
+
+{% block content %}
+
+<div class="row mb-4">
+
+    <div class="col-md-6">
+        <h2>محصولات فروشگاه</h2>
+    </div>
+
+    <div class="col-md-6">
+
+        <form method="get">
+
+            <div class="position-relative">
+
+                <div class="input-group">
+
+                    <input
+                        type="text"
+                        id="live-search"
+                        class="form-control"
+                        name="q"
+                        placeholder="جستجوی محصول..."
+                        autocomplete="off"
+                    >
+
+                    <button class="btn btn-primary">
+                        جستجو
+                    </button>
+
+                </div>
+
+                <div
+                    id="search-results"
+                    class="list-group search-dropdown"
+                ></div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<form method="get" class="row mb-4 g-2">
+
+    <div class="col-md-3">
+
+        <select
+            name="category"
+            class="form-select"
+        >
+
+            <option value="">
+                همه دسته‌ها
+            </option>
+
+            {% for category in categories %}
+
+                <option
+                    value="{{ category.slug }}"
+                    {% if selected_category == category.slug %}
+                        selected
+                    {% endif %}
+                >
+                    {{ category.name }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <select
+            name="brand"
+            class="form-select"
+        >
+
+            <option value="">
+                همه برندها
+            </option>
+
+            {% for brand in brands %}
+
+                <option
+                    value="{{ brand.slug }}"
+                    {% if selected_brand == brand.slug %}
+                        selected
+                    {% endif %}
+                >
+                    {{ brand.name }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <select
+            name="sort"
+            class="form-select"
+        >
+
+            <option value="">
+                مرتب سازی
+            </option>
+
+            <option
+                value="price_low"
+                {% if selected_sort == "price_low" %}
+                    selected
+                {% endif %}
+            >
+                ارزان‌ترین
+            </option>
+
+            <option
+                value="price_high"
+                {% if selected_sort == "price_high" %}
+                    selected
+                {% endif %}
+            >
+                گران‌ترین
+            </option>
+
+        </select>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <button
+            class="btn btn-dark w-100"
+        >
+            اعمال فیلتر
+        </button>
+
+    </div>
+
+</form>
+
+
+<div class="row g-4">
+
+    {% for product in products %}
+
+        <div class="col-6 col-md-4">
+
+            <div class="card product-card h-100 border-0 shadow-sm">
+
+    {% if product.image %}
+
+    <img
+        src="{{ product.image.url }}"
+        class="card-img-top product-image"
+        alt="{{ product.name }}"
+    >
+
+{% else %}
+
+    <img
+        src="https://placehold.co/600x600"
+        class="card-img-top product-image"
+        alt="No Image"
+    >
+
+{% endif %}
+
+    <div class="card-body d-flex flex-column">
+
+        <div class="mb-2">
+
+            <span class="badge bg-secondary">
+
+                {{ product.brand }}
+
+            </span>
+
+            <span class="badge bg-primary">
+
+                {{ product.category }}
+
+            </span>
+
+        </div>
+
+        <h5 class="card-title fw-bold">
+
+            {{ product.name }}
+
+        </h5>
+
+        <h4 class="text-success mt-3">
+
+            {{ product.price|floatformat:0|intcomma }} تومان
+
+        </h4>
+
+    </div>
+
+    <div class="card-footer bg-white border-0">
+
+        <a
+            href="{% url 'product_detail' product.id %}"
+            class="btn btn-dark w-100 mt-auto"
+        >
+            مشاهده محصول
+        </a>
+
+    </div>
+
+</div>
+
+        </div>
+
+    {% empty %}
+
+        <div class="col-12">
+
+            <div class="alert alert-warning">
+
+                محصولی پیدا نشد.
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+
+{% if products.has_other_pages %}
+
+<nav class="mt-5">
+
+    <ul class="pagination justify-content-center">
+
+        {% if products.has_previous %}
+
+            <li class="page-item">
+
+                <a
+                    class="page-link"
+                    href="?page={{ products.previous_page_number }}"
+                >
+                    قبلی
+                </a>
+
+            </li>
+
+        {% endif %}
+
+        {% for num in products.paginator.page_range %}
+
+            <li
+                class="page-item
+                {% if products.number == num %}
+                    active
+                {% endif %}"
+            >
+
+                <a
+                    class="page-link"
+                    href="?page={{ num }}"
+                >
+                    {{ num }}
+                </a>
+
+            </li>
+
+        {% endfor %}
+
+        {% if products.has_next %}
+
+            <li class="page-item">
+
+                <a
+                    class="page-link"
+                    href="?page={{ products.next_page_number }}"
+                >
+                    بعدی
+                </a>
+
+            </li>
+
+        {% endif %}
+
+    </ul>
+
+</nav>
+
+{% endif %}
+
+
+<script>
+
+let timer;
+
+const searchInput =
+    document.getElementById("live-search");
+
+const resultsBox =
+    document.getElementById("search-results");
+
+searchInput.addEventListener(
+    "keyup",
+    function(){
+
+        const query = this.value;
+
+        clearTimeout(timer);
+
+        if(query.length < 2){
+
+            resultsBox.innerHTML = "";
+
+            return;
+
+        }
+
+        timer = setTimeout(
+
+            () => {
+
+                fetch(
+                    `/ajax/search/?q=${query}`
+                )
+                .then(r => r.json())
+                .then(data => {
+
+                    resultsBox.innerHTML = "";
+
+                    if(data.length === 0){
+
+                        resultsBox.innerHTML = `
+                            <div class="list-group-item text-muted">
+                                محصولی پیدا نشد
+                            </div>
+                        `;
+
+                        return;
+
+                    }
+
+                    data.forEach(product => {
+
+                        resultsBox.innerHTML += `
+                            <a
+                                href="/products/${product.id}/"
+                                class="list-group-item list-group-item-action"
+                            >
+
+                                <div class="d-flex align-items-center">
+
+                                    <img
+                                        src="${product.image}"
+                                        class="rounded me-2"
+                                        style="
+                                            width:50px;
+                                            height:50px;
+                                            object-fit:cover;
+                                        "
+                                    >
+
+                                    <div>
+
+                                        <div>
+                                            ${product.name}
+                                        </div>
+
+                                        <small class="text-muted">
+                                            ${product.brand}
+                                        </small>
+
+                                        <div class="text-success">
+                                            ${product.price} تومان
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </a>
+                        `;
+
+                    });
+
+                });
+
+            },
+
+            300
+
+        );
+
+    }
+
+);
+
+</script>
+
+{% endblock %}

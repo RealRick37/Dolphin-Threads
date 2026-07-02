@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="text-center py-5">
+
+    <h1>
+        دسترسی غیرمجاز
+    </h1>
+
+    <p>
+        شما اجازه مشاهده این صفحه را ندارید.
+    </p>
+
+    <a href="{% url 'home' %}" class="btn btn-primary">
+        خانه
+    </a>
+
+</div>
+
+{% endblock %}

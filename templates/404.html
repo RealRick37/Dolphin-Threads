@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="text-center py-5">
+
+    <h1 class="display-1 fw-bold">
+        404
+    </h1>
+
+    <p class="lead">
+        صفحه مورد نظر پیدا نشد.
+    </p>
+
+    <a
+        href="{% url 'home' %}"
+        class="btn btn-primary"
+    >
+        بازگشت به خانه
+    </a>
+
+</div>
+
+{% endblock %}

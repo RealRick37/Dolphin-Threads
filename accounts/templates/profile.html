@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}
+پروفایل
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-md-8">
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-body p-4">
+
+                <h2 class="mb-4">
+
+                    پروفایل کاربری
+
+                </h2>
+
+                <div class="mb-3">
+
+                    <strong>
+                        نام کاربری:
+                    </strong>
+
+                    {{ profile.user.username }}
+
+                </div>
+
+                <div class="mb-3">
+
+                    <strong>
+                        ایمیل:
+                    </strong>
+
+                    {{ profile.user.email }}
+
+                </div>
+
+                <div class="mb-3">
+
+                    <strong>
+                        تلفن:
+                    </strong>
+
+                    {{ profile.phone|default:"ثبت نشده" }}
+
+                </div>
+
+                <div class="mb-4">
+
+                    <strong>
+                        آدرس:
+                    </strong>
+
+                    {{ profile.address|default:"ثبت نشده" }}
+
+                </div>
+
+                <a
+                    href="{% url 'edit_profile' %}"
+                    class="btn btn-warning"
+                >
+                    ویرایش پروفایل
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
