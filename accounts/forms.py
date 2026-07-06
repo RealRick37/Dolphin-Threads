@@ -48,14 +48,6 @@ class RegisterForm(forms.Form):
         return password
 
 
-    def save(self):
-        user=User.objects.create_user(
-            username=self.cleaned_data["username"],
-            email=self.cleaned_data["email"],
-            password=self.cleaned_data["password"]
-        )
-        return user
-
 class ProfileForm(forms.ModelForm):
 
     class Meta:
@@ -78,3 +70,10 @@ class ProfileForm(forms.ModelForm):
                 }
             ),
         }
+
+class VerifyOTPForm(forms.Form):
+    otp=forms.CharField(max_length=6,
+    widget=forms.TextInput(attrs={
+        "class": "form-control",
+        "placeholder": "کد تایید"
+    }))

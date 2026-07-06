@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-5">
+
+            <div class="card shadow">
+
+                <div class="card-body">
+
+                    <h3 class="text-center mb-4">
+                        تایید ایمیل
+                    </h3>
+
+                    <div class="alert alert-info text-center">
+
+                        زمان باقی مانده:
+
+                        <span id="timer">
+                            {{ remaining }}
+                        </span>
+
+                        ثانیه
+
+                    </div>
+
+                    <form method="post">
+
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+
+                            {{ form.otp.label_tag }}
+
+                            {{ form.otp }}
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100"
+                        >
+                            تایید کد
+                        </button>
+
+                    </form>
+
+                    <hr>
+
+                    <div class="text-center">
+
+                        <a
+                            href="{% url 'resend_otp' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            ارسال مجدد کد
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+let timeLeft = parseInt("{{ remaining }}");
+
+const timer = document.getElementById("timer");
+
+const interval = setInterval(() => {
+
+    if (timeLeft <= 0) {
+
+        clearInterval(interval);
+
+        timer.innerText = "منقضی شد";
+
+        return;
+
+    }
+
+    timeLeft--;
+
+    timer.innerText = timeLeft;
+
+}, 1000);
+
+</script>
+
+{% endblock %}
