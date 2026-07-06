@@ -6,6 +6,11 @@ Persian RTL Clothing Shop Website built with Django.
 
 * Custom User Model
 * Django Authentication System
+* Email verification using OTP
+* OTP expiration (5 minutes)
+* OTP resend functionality
+* Maximum verification attempts protection
+* Welcome Email System
 * User Profiles
 * Product Variants (Color & Size)
 * Shopping Cart
@@ -13,7 +18,6 @@ Persian RTL Clothing Shop Website built with Django.
 * Order Management
 * Product Comments
 * AJAX Search
-* Welcome Email System
 * PostgreSQL Database
 * Responsive Design
 * Persian RTL UI
