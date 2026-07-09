@@ -5,7 +5,6 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
 import random
 from django.core.mail import send_mail
 from .forms import VerifyOTPForm
@@ -143,8 +142,9 @@ def login_view(request):
             user=form.get_user()
             login(request, user)
             messages.success(request, f"خوش اومدی {user.username}")
-            return redirect("product_list")
+            return redirect("home")
     return render(request, "login.html", {"form":form})
+
 
 def logout_view(request):
     logout(request)
