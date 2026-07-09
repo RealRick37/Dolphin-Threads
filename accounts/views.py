@@ -2,100 +2,115 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import RegisterForm, ProfileForm
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login
-from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
 import random
 from django.core.mail import send_mail
 from .forms import VerifyOTPForm
 from django.contrib.auth import get_user_model
-from .models import EmailOTP
+from .models import EmailOTP, Profile
 from django.utils import timezone
+from django.views.generic import FormView, DetailView, UpdateView
+from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+
 # Create your views here.
 
 User = get_user_model()
 
-def register_view(request):
-    form = RegisterForm(request.POST or None)
+class RegisterView(FormView):
+    template_name="register.html"
+    form_class=RegisterForm
+    success_url=reverse_lazy("verify_email")
 
-    if request.user.is_authenticated:
-        return redirect("home")
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect("home")
+        return super().dispatch(request, *args, **kwargs)
 
-    if request.method == "POST":
-        if form.is_valid():
+    def form_valid(self, form):
+        self.request.session["register_data"]={
+            "username": form.cleaned_data["username"],
+            "email": form.cleaned_data["email"],
+            "password": form.cleaned_data["password"],
+        }
 
-            request.session["register_data"] = {
-                "username": form.cleaned_data["username"],
-                "email": form.cleaned_data["email"],
-                "password": form.cleaned_data["password"],
-            }
+        otp=str(random.randint(100000, 999999))
 
-            otp = str(random.randint(100000, 999999))
+        EmailOTP.objects.update_or_create(email=form.cleaned_data["email"], defaults={"code": otp})
 
-            EmailOTP.objects.update_or_create(email=form.cleaned_data["email"], defaults={"code": otp})
+        send_mail(subject="Email Verification", message=f"Your verification code is: {otp}", from_email=None, recipient_list=[form.cleaned_data["email"]],)
 
-            send_mail(subject="Email Verification", message=f"Your verification code is: {otp}", from_email=None,
-                    recipient_list=[form.cleaned_data["email"]],)
+        messages.success(self.request, "کد تائید به ایمیل شما ارسال شد.")
 
-            messages.success(request, "کد تایید به ایمیل شما ارسال شد.")
+        return super().form_valid(form)
 
-            return redirect("verify_email")
+class VerifyEmailView(FormView):
+    template_name = "emails/verify_email.html"
+    form_class = VerifyOTPForm
+    success_url = reverse_lazy("login")
 
-    return render(request, "register.html", {"form": form})
+    def dispatch(self, request, *args, **kwargs):
 
+        self.register_data = request.session.get("register_data")
 
-def verify_email(request):
-    form = VerifyOTPForm(request.POST or None)
-
-    data = request.session.get("register_data")
-
-    if not data:
-        messages.error(request, "ابتدا ثبت نام را انجام بده.")
-        return redirect("register")
-
-    otp_obj = EmailOTP.objects.filter(
-        email=data["email"]).first()
-
-    if not otp_obj:
-        messages.error(request, "کد تاییدی پیدا نشد.")
-        return redirect("register")
-
-    passed = (timezone.now() - otp_obj.created_at).total_seconds()
-    remaining = max(0, int(300 - passed))
-
-    if request.method == "POST":
-
-        if otp_obj.attempts >= 5:
-            messages.error(request, "تعداد تلاش مجاز تمام شده است.")
+        if not self.register_data:
+            messages.error(request, "ابتدا ثبت نام را انجام بده.")
             return redirect("register")
 
-        if otp_obj.is_expired():
-            messages.error(request, "زمان کد تایید به پایان رسیده است.")
+        self.otp_obj = EmailOTP.objects.filter(email=self.register_data["email"]).first()
+
+        if not self.otp_obj:
+            messages.error(request, "کد تاییدی پیدا نشد.")
+            return redirect("register")
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+
+        context = super().get_context_data(**kwargs)
+
+        passed = (timezone.now() - self.otp_obj.created_at).total_seconds()
+
+        context["remaining"] = max(0, int(300 - passed))
+
+        return context
+
+    def form_valid(self, form):
+
+        if self.otp_obj.attempts >= 5:
+
+            messages.error(self.request, "تعداد تلاش مجاز تمام شده است.")
+
+            return redirect("register")
+
+        if self.otp_obj.is_expired():
+
+            messages.error(self.request, "زمان کد تایید به پایان رسیده است.")
+
             return redirect("verify_email")
 
-        if form.is_valid():
+        user_otp = form.cleaned_data["otp"]
 
-            user_otp = form.cleaned_data["otp"]
+        if user_otp == self.otp_obj.code:
 
-            if user_otp == otp_obj.code:
+            User.objects.create_user(username=self.register_data["username"], email=self.register_data["email"],
+                password=self.register_data["password"],)
 
-                User.objects.create_user(username=data["username"], email=data["email"], password=data["password"])
+            self.otp_obj.delete()
+            self.request.session.pop("register_data", None)
 
-                otp_obj.delete()
+            messages.success(self.request, "حساب کاربری با موفقیت ساخته شد.")
 
-                request.session.pop("register_data", None)
+            return super().form_valid(form)
 
-                messages.success(request, "حساب کاربری با موفقیت ساخته شد.")
+        self.otp_obj.attempts += 1
+        self.otp_obj.save()
 
-                return redirect("login")
+        messages.error(self.request, f"کد اشتباه است. ({self.otp_obj.attempts}/5)")
 
-            otp_obj.attempts += 1
-            otp_obj.save()
+        return self.form_invalid(form)
 
-            messages.error(request, f"کد اشتباه است. ({otp_obj.attempts}/5)")
-
-    return render(request, "emails/verify_email.html", {"form": form, "remaining": remaining,})
 
 def resend_otp(request):
 
@@ -132,43 +147,51 @@ def resend_otp(request):
     return redirect("verify_email")
 
 
-def login_view(request):
-    form=AuthenticationForm(request, data=request.POST or None)
+class UserLoginView(LoginView):
+    template_name="login.html"
+    authentication_form=AuthenticationForm
+    redirect_authenticated_user=True
+
+    def form_valid(self, form):
+        response=super().form_valid(form)
+        messages.success(self.request, f"خوش اومدی {self.request.user.username}")
+        return response
     
-    if request.user.is_authenticated:
-        return redirect("home")
+    def get_success_url(self):
+        return reverse_lazy("home")
 
-    if request.method=="POST":
-        if form.is_valid():
-            user=form.get_user()
-            login(request, user)
-            messages.success(request, f"خوش اومدی {user.username}")
-            return redirect("product_list")
-    return render(request, "login.html", {"form":form})
-
-def logout_view(request):
-    logout(request)
-    messages.success(request, "با موفقیت خارج شدی.")
-    return redirect("login")
+class UserLogoutView(LogoutView):
+    next_page = reverse_lazy("login")
+    def dispatch(self, request, *args, **kwargs):
+        messages.success(request, "با موفقیت خارج شدی.")
+        return super().dispatch(request, *args, **kwargs)
 
 
 # ---- profile -----
+class ProfileView(LoginRequiredMixin, DetailView):
+    model=Profile
+    template_name="profile.html"
+    context_object_name="profile"
 
-@login_required
-def profile_view(request):
-    profile=request.user.profile
-    return render(request, "profile.html", {"profile": profile})
+    def get_object(self):
+        return self.request.user.profile
 
 
-@login_required
-def edit_profile(request):
-    profile=request.user.profile
-    form=ProfileForm(request.POST or None, instance=profile)
-    if request.method=="POST":
-        if form.is_valid():
-            form.save()
-            messages.success(request, "پروفایل بروزرسانی شد.")
+class EditProfileView(LoginRequiredMixin, UpdateView):
+    model=Profile
+    form_class=ProfileForm
+    template_name="edit_profile.html"
 
-            return redirect("profile")
-    return render(request, "edit_profile.html", {"form": form})
+    def get_object(self):
+        return self.request.user.profile
+    
+    def get_success_url(self):
+        return reverse_lazy("profile")
+    
+    def form_valid(self, form):
+
+        response = super().form_valid(form)
+        messages.success(self.request, "پروفایل بروزرسانی شد.")
+
+        return response
 

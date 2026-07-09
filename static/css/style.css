@@ -359,3 +359,10 @@ footer .d-flex{
     }
 
 }
+
+.logout-btn:hover,
+.logout-btn:focus,
+.logout-btn:active {
+    background-color: transparent !important;
+    color: #dc3545 !important;
+}
