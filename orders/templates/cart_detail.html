@@ -155,116 +155,114 @@
 
 <script>
 
-document
-.querySelectorAll(".increase-btn")
-.forEach(btn => {
+const csrftoken = "{{ csrf_token }}";
 
-    btn.addEventListener(
-        "click",
-        function(){
+document.querySelectorAll(".increase-btn").forEach(btn => {
 
-            const itemId = this.dataset.item;
+    btn.addEventListener("click", function () {
 
-            fetch(`/orders/ajax/increase/${itemId}/`)
-            .then(r => r.json())
-            .then(data => {
+        const itemId = this.dataset.item;
 
-                if(data.success){
+        fetch(`/orders/ajax/increase/${itemId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrftoken,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
 
-                    document.getElementById(
-                        `quantity-${itemId}`
-                    ).innerText = data.quantity;
+            if (data.success) {
 
-                    document.getElementById(
-                        "cart-total"
-                    ).innerText =
-                        data.total_price + " تومان";
-
-                }else{
-
-                    alert(data.message);
-
-                }
-
-            });
-
-        }
-    );
-
-});
-
-document
-.querySelectorAll(".decrease-btn")
-.forEach(btn => {
-
-    btn.addEventListener(
-        "click",
-        function(){
-
-            const itemId = this.dataset.item;
-
-            fetch(`/orders/ajax/decrease/${itemId}/`)
-            .then(r => r.json())
-            .then(data => {
-
-                if(data.deleted){
-
-                    document.getElementById(
-                        `cart-item-${itemId}`
-                    ).remove();
-
-                }else{
-
-                    document.getElementById(
-                        `quantity-${itemId}`
-                    ).innerText =
-                        data.quantity;
-
-                }
+                document.getElementById(
+                    `quantity-${itemId}`
+                ).innerText = data.quantity;
 
                 document.getElementById(
                     "cart-total"
-                ).innerText =
-                    data.total_price + " تومان";
+                ).innerText = data.total_price + " تومان";
 
-            });
+            } else {
 
-        }
-    );
+                alert(data.message);
+
+            }
+
+        });
+
+    });
 
 });
 
-document
-.querySelectorAll(".remove-btn")
-.forEach(btn => {
+document.querySelectorAll(".decrease-btn").forEach(btn => {
 
-    btn.addEventListener(
-        "click",
-        function(){
+    btn.addEventListener("click", function () {
 
-            const itemId = this.dataset.item;
+        const itemId = this.dataset.item;
 
-            fetch(`/orders/ajax/remove/${itemId}/`)
-            .then(r => r.json())
-            .then(data => {
+        fetch(`/orders/ajax/decrease/${itemId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrftoken,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
 
-                if(data.success){
+            if (data.deleted) {
 
-                    document.getElementById(
-                        `cart-item-${itemId}`
-                    ).remove();
+                document.getElementById(
+                    `cart-item-${itemId}`
+                ).remove();
 
-                    document.getElementById(
-                        "cart-total"
-                    ).innerText =
-                        data.total_price + " تومان";
+            } else {
 
-                }
+                document.getElementById(
+                    `quantity-${itemId}`
+                ).innerText = data.quantity;
 
-            });
+            }
 
-        }
-    );
+            document.getElementById(
+                "cart-total"
+            ).innerText = data.total_price + " تومان";
+
+        });
+
+    });
+
+});
+
+document.querySelectorAll(".remove-btn").forEach(btn => {
+
+    btn.addEventListener("click", function () {
+
+        const itemId = this.dataset.item;
+
+        fetch(`/orders/ajax/remove/${itemId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrftoken,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.success) {
+
+                document.getElementById(
+                    `cart-item-${itemId}`
+                ).remove();
+
+                document.getElementById(
+                    "cart-total"
+                ).innerText = data.total_price + " تومان";
+
+            }
+
+        });
+
+    });
 
 });
 
