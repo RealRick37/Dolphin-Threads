@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'products',
     'orders',
     "django.contrib.humanize",
+    "rest_framework",
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
