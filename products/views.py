@@ -8,7 +8,6 @@ from django.views.generic import TemplateView, ListView, DetailView, CreateView,
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from .forms import *
-
 # Create your views here.
 
 class HomeView(TemplateView):
