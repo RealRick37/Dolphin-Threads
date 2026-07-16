@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import Product, Category, Brand
-
+from .models import Product, Category, Brand, Color, ProductVariant, ProductImage, Comment
+from django.db.models import Avg
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,9 +20,53 @@ class BrandSerializer(serializers.ModelSerializer):
             "slug",
         ]
 
+class ColorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Color
+        fields=[
+            "id",
+            "name",
+        ]
+
+class ProductVariantSerializer(serializers.ModelSerializer):
+    color=ColorSerializer(read_only=True)
+    class Meta:
+        model=ProductVariant
+        fields=[
+            "id",
+            "size",
+            "stock",
+            "color",
+        ]
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=ProductImage
+        fields=[
+            "id",
+            "image",
+            "alt_text",
+            "is_main",
+        ]
+
+class CommentSerializer(serializers.ModelSerializer):
+    user=serializers.StringRelatedField(read_only=True)
+    class Meta:
+        model=Comment
+        fields=[
+            "id",
+            "user",
+            "text",
+            "rating",
+            "created_at",
+        ]
 class ProductSerializer(serializers.ModelSerializer):
     brand=BrandSerializer(read_only=True)
     category=CategorySerializer(read_only=True)
+    variants=ProductVariantSerializer(many=True, read_only=True)
+    images=ProductImageSerializer(many=True, read_only=True)
+    avg_rating = serializers.FloatField(read_only=True)
+    comment_count = serializers.IntegerField(read_only=True)
     class Meta:
         model=Product
         fields = [
@@ -32,4 +76,8 @@ class ProductSerializer(serializers.ModelSerializer):
             "price",
             "category",
             "brand",
+            "variants",
+            "images",
+            "avg_rating",
+            "comment_count",
         ]
