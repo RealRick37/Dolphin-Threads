@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Category, Brand, Color, ProductVariant, ProductImage, Comment
+from .models import Product, Category, Brand, Color, ProductVariant, ProductImage, Comment, Wishlist
 from django.db.models import Avg
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -56,10 +56,13 @@ class CommentSerializer(serializers.ModelSerializer):
         fields=[
             "id",
             "user",
+            "product",
             "text",
             "rating",
             "created_at",
         ]
+
+
 class ProductSerializer(serializers.ModelSerializer):
     brand=BrandSerializer(read_only=True)
     category=CategorySerializer(read_only=True)
@@ -80,4 +83,23 @@ class ProductSerializer(serializers.ModelSerializer):
             "images",
             "avg_rating",
             "comment_count",
+        ]
+
+
+class WishlistSerializer(serializers.ModelSerializer):
+    product=ProductSerializer(read_only=True)
+
+    class Meta:
+        model=Wishlist
+        fields=[
+            "id",
+            "product",
+            "created_at",
+        ]
+
+class WishlistCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Wishlist
+        fields=[
+            "product",
         ]
