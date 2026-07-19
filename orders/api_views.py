@@ -7,7 +7,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
+from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
 
+@extend_schema(summary="Get current cart", description="Returns authenticated user's cart.")
 class CartAPIView(RetrieveAPIView):
     serializer_class=CartSerializer
     permission_classes=[IsAuthenticated]
@@ -16,6 +19,7 @@ class CartAPIView(RetrieveAPIView):
         cart, created=Cart.objects.get_or_create(user=self.request.user)
         return cart
 
+@extend_schema(summary="Add item to cart", description="Add product variant to cart.")
 class AddToCartAPIView(APIView):
     permission_classes=[IsAuthenticated]
 
@@ -44,7 +48,7 @@ class IncreaseCartItemAPIView(APIView):
     permission_classes=[IsAuthenticated]
 
     def post(self, request, item_id):
-        item=CartItem.objects.get(id=item_id, cart__user=request.user)
+        item=get_object_or_404(CartItem, id=item_id, cart__user=request.user)
 
         if item.quantity>=item.variant.stock:
             return Response({"detail": "Not enoug stock"}, status=status.HTTP_400_BAD_REQUEST)
@@ -58,7 +62,7 @@ class DecreaseCartItemAPIView(APIView):
     permission_classes=[IsAuthenticated]
 
     def post(self, request, item_id):
-        item=CartItem.objects.get(id=item_id, cart__user=request.user)
+        item=get_object_or_404(CartItem, id=item_id, cart__user=request.user)
         item.quantity-=1
 
         if item.quantity<=0:
@@ -72,10 +76,11 @@ class RemoveCartItemAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, item_id):
-        item=CartItem.objects.get(id=item_id, cart__user=request.user)
+        item=get_object_or_404(CartItem, id=item_id, cart__user=request.user)
         item.delete()
         return Response({"detail": "Deleted"})
 
+@extend_schema(summary="Checkout", description="Create order from cart and reduce stock.")
 class CheckoutAPIView(APIView):
     permission_classes=[IsAuthenticated]
 
@@ -102,6 +107,7 @@ class CheckoutAPIView(APIView):
             return Response({"detail": "Order created", "order_id": order.id})
 
 
+@extend_schema(summary="Order history", description="Returns all orders of current user.")
 class OrderHistoryAPIView(ListAPIView):
     serializer_class=OrderSerializer
     permission_classes=[IsAuthenticated]
@@ -109,6 +115,7 @@ class OrderHistoryAPIView(ListAPIView):
     def get_queryset(self):
         return(Order.objects.filter(user=self.request.user).prefetch_related("items__variant").order_by("-created_at"))
 
+@extend_schema(summary="Order detail", description="Returns one order.")
 class OrderDetailAPIView(RetrieveAPIView):
     serializer_class=OrderSerializer
     permission_classes=[IsAuthenticated]
