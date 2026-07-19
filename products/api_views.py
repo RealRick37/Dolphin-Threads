@@ -32,9 +32,14 @@ class ProductViewSet(ModelViewSet):
 class CommentViewSet(ModelViewSet):
     queryset=Comment.objects.all()
     serializer_class=CommentSerializer
-    permission_classes=[IsAuthenticatedOrReadOnly,    IsOwnerOrReadOnly]
+    permission_classes=[IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def perform_create(self, serializer):
+        product=serializer.validate_data["product"]
+
+        if Comment.objects.filter(user=self.request.user, product=product).exists():
+            raise ValidationError({"detail": "شما برای این محصول نظر ثبت کرده اید."})
+        
         serializer.save(user=self.request.user)
 
 class ProductCommentsAPIView(ListAPIView):
