@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     "rest_framework",
     "django_filters",
+    "drf_spectacular",
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -164,6 +165,8 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS":
+        "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": (
         "rest_framework.pagination.PageNumberPagination"
     ),
@@ -171,4 +174,10 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": [
     "django_filters.rest_framework.DjangoFilterBackend",
 ]
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Clothes Shop API",
+    "DESCRIPTION": "Backend API for Clothes Shop",
+    "VERSION": "1.0.0",
 }

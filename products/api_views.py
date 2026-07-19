@@ -9,6 +9,7 @@ from django.db.models import Avg, Count, Q
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.generics import ListAPIView
 from rest_framework.exceptions import ValidationError
+from drf_spectacular.utils import extend_schema
 
 class ProductViewSet(ModelViewSet):
     queryset=Product.objects.select_related("brand", "category").prefetch_related("images", "variants__color").annotate(
@@ -17,6 +18,12 @@ class ProductViewSet(ModelViewSet):
     serializer_class=ProductSerializer
     permission_classes=[IsAdminOrReadOnly]
     filter_backends=[DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter,]
+    @extend_schema(summary="List products", description="Returns all products with filters, ordering and search support.")
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    @extend_schema(summary="Product detail", description="Returns a single product with variants, images and ratings.")
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
     
     search_fields=[
         "name",
@@ -35,7 +42,7 @@ class CommentViewSet(ModelViewSet):
     permission_classes=[IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def perform_create(self, serializer):
-        product=serializer.validate_data["product"]
+        product=serializer.validated_data["product"]
 
         if Comment.objects.filter(user=self.request.user, product=product).exists():
             raise ValidationError({"detail": "شما برای این محصول نظر ثبت کرده اید."})
@@ -53,6 +60,10 @@ class ProductCommentsAPIView(ListAPIView):
 class WishlistViewSet(ModelViewSet):
     serializer_class=WishlistSerializer
     permission_classes=[IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    @extend_schema(summary="Add product to wishlist", description="Adds a product to the authenticated user's wishlist.")
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
 
     def get_queryset(self):
         return Wishlist.objects.filter(user=self.request.user).select_related("product")
