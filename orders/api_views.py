@@ -26,7 +26,6 @@ class AddToCartAPIView(APIView):
     def post(self, request):
         serializer=AddToCartSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        print(serializer.validated_data)
 
         variant_id=serializer.validated_data["variant_id"]
         quantity=serializer.validated_data["quantity"]
