@@ -6,11 +6,11 @@
 
 <h2 class="fw-bold mb-4">علاقه‌مندی‌های من</h2>
 
-{% if items %}
+{% if wishlist_items  %}
 
     <div class="row row-cols-1 row-cols-md-3 g-4">
 
-        {% for item in items %}
+        {% for item in wishlist_items  %}
 
             <div class="col" id="wishlist-item-{{ item.product.id }}">
                 <div class="card h-100 shadow-sm">

@@ -243,34 +243,29 @@
 </div>
 
 
-{% if products.has_other_pages %}
+{% if is_paginated %}
 
 <nav class="mt-5">
 
     <ul class="pagination justify-content-center">
 
-        {% if products.has_previous %}
+        {% if page_obj.has_previous %}
 
             <li class="page-item">
-
                 <a
                     class="page-link"
-                    href="?page={{ products.previous_page_number }}"
+                    href="?page={{ page_obj.previous_page_number }}"
                 >
                     قبلی
                 </a>
-
             </li>
 
         {% endif %}
 
-        {% for num in products.paginator.page_range %}
+        {% for num in paginator.page_range %}
 
             <li
-                class="page-item
-                {% if products.number == num %}
-                    active
-                {% endif %}"
+                class="page-item {% if page_obj.number == num %}active{% endif %}"
             >
 
                 <a
@@ -284,17 +279,15 @@
 
         {% endfor %}
 
-        {% if products.has_next %}
+        {% if page_obj.has_next %}
 
             <li class="page-item">
-
                 <a
                     class="page-link"
-                    href="?page={{ products.next_page_number }}"
+                    href="?page={{ page_obj.next_page_number }}"
                 >
                     بعدی
                 </a>
-
             </li>
 
         {% endif %}

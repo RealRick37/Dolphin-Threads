@@ -113,10 +113,13 @@
                             </button>
                         {% elif variant.stock > 0 %}
                             <span class="badge bg-warning text-dark">فقط {{ variant.stock }} عدد باقی مانده</span>
-                            <a href="{% url 'add_to_cart' variant.id %}" class="badge btn btn-success btn-sm">
-                                افزودن به سبد خرید
-                            </a>
-                        {% else %}
+                            <button
+                                    class="btn btn-success btn-sm add-to-cart-btn"
+                                    data-variant="{{ variant.id }}"
+                                >
+                                    افزودن به سبد خرید
+                                </button>
+                                                        {% else %}
                             <span class="badge bg-danger">ناموجود</span>
                         {% endif %}
                     </div>
@@ -411,6 +414,47 @@ document.addEventListener("DOMContentLoaded", function () {
             setTimeout(() => {
                 mainImage.classList.remove("fade-in");
             }, 500);
+
+        });
+
+    });
+
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.querySelectorAll(".add-to-cart-btn").forEach(btn => {
+
+        btn.addEventListener("click", function () {
+
+            const variantId = this.dataset.variant;
+
+            fetch(`/orders/add/${variantId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                if (data.success) {
+
+                    const badge = document.getElementById("cart-badge");
+
+                    if (badge) {
+                        badge.innerText = data.cart_count;
+                        badge.classList.remove("d-none");
+                    }
+
+                } else {
+
+                    alert(data.message);
+
+                }
+
+            });
 
         });
 

@@ -22,6 +22,9 @@ class Color(models.Model):
         return self.name
 
 class Product(models.Model):
+    class Meta:
+        ordering=["-created_at"]
+    
     name=models.CharField(max_length=100)
     description=models.TextField()
     category=models.ForeignKey(Category, on_delete=models.CASCADE, related_name="products")
