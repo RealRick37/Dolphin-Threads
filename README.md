@@ -1,35 +1,75 @@
 # Dolphin Threads
 
-Persian RTL Clothing Shop Website built with Django.
+Persian RTL Clothing Shop built with Django & Django REST Framework.
 
 ## Features
 
+### Authentication
+
 * Custom User Model
-* Django Authentication System
-* Email verification using OTP
-* OTP expiration (5 minutes)
-* OTP resend functionality
-* Maximum verification attempts protection
+* Registration System
+* Login & Logout
+* Email Verification using OTP
+* OTP Expiration (5 minutes)
+* OTP Resend Functionality
+* Maximum Verification Attempts Protection
 * Welcome Email System
 * User Profiles
+
+### Products
+
+* Categories
+* Brands
 * Product Variants (Color & Size)
+* Product Gallery
+* Product Comments & Ratings
+* Wishlist System
+* Search Products
+* Filter Products
+* Ordering Products
+* Pagination
+
+### Orders
+
 * Shopping Cart
-* Wishlist
-* Order Management
-* Product Comments
-* AJAX Search
+* Cart Management
+* Checkout System
+* Order History
+* Order Detail
+* Stock Management
+
+### API
+
+* Django REST Framework
+* JWT Authentication
+* Swagger / OpenAPI Documentation
+* Product API
+* Cart API
+* Order API
+* Account API
+
+### Other
+
 * PostgreSQL Database
 * Responsive Design
 * Persian RTL UI
+* Automated API Tests
+
+---
 
 ## Technologies
 
 * Python
 * Django
+* Django REST Framework
+* SimpleJWT
+* drf-spectacular
 * PostgreSQL
 * Bootstrap 5
 * JavaScript
-* HTML/CSS
+* HTML / CSS
+
+---
 
 ## Screenshots
 
@@ -68,16 +108,21 @@ Persian RTL Clothing Shop Website built with Django.
 
 ![Admin](screenshots/Admin%20Panel.png)
 
-## Project Status
+## API Documentation
 
-Current Version: v1.0
+Swagger UI:
 
-Future Plans:
+```text
+/api/schema/swagger-ui/
+```
 
-- CBV Refactor
-- Django REST Framework API
-- Payment Gateway Integration
-- Deployment
+OpenAPI Schema:
+
+```text
+/api/schema/
+```
+
+---
 
 ## Installation
 
@@ -93,7 +138,7 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Create `.env` file and configure:
+Create `.env` file:
 
 ```env
 SECRET_KEY=your_secret_key
@@ -126,10 +171,39 @@ Run development server:
 python manage.py runserver
 ```
 
+---
+
+## Tests
+
+Run all tests:
+
+```bash
+python manage.py test
+```
+
+---
+
+## Current Version
+
+v3.0
+
+---
+
+
+## Future Plans
+
+Not really sure what else could be added.
+
+---
+
+
 ## Language
 
 This project is designed for Persian-speaking users and uses a fully RTL interface.
 
 ## More
-This project will probably be expanded. 
-Hope you guys find it helpful ! :)
+
+This project started as a simple learning project and gradually evolved into a complete e-commerce platform with both web and REST API support.
+And all along, it was such a great experience for me...
+
+Hope you find it useful :)
