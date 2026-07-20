@@ -53,6 +53,8 @@ class ProductCommentsAPIView(ListAPIView):
     serializer_class=CommentSerializer
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Comment.objects.none()
         product_id=self.kwargs["product_id"]
 
         return Comment.objects.filter(product_id=product_id, is_approved=True).select_related("user")
@@ -66,6 +68,8 @@ class WishlistViewSet(ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Wishlist.objects.none()
         return Wishlist.objects.filter(user=self.request.user).select_related("product")
 
     def get_serializer_class(self):

@@ -19,7 +19,7 @@ class CartAPIView(RetrieveAPIView):
         cart, created=Cart.objects.get_or_create(user=self.request.user)
         return cart
 
-@extend_schema(summary="Add item to cart", description="Add product variant to cart.")
+@extend_schema(summary="Add item to cart", description="Add product variant to cart.", responses={201: None})
 class AddToCartAPIView(APIView):
     permission_classes=[IsAuthenticated]
 
@@ -115,6 +115,8 @@ class OrderHistoryAPIView(ListAPIView):
     permission_classes=[IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Order.objects.none()
         return(Order.objects.filter(user=self.request.user).prefetch_related("items__variant").order_by("-created_at"))
 
 @extend_schema(summary="Order detail", description="Returns one order.")
@@ -123,4 +125,6 @@ class OrderDetailAPIView(RetrieveAPIView):
     permission_classes=[IsAuthenticated]
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Order.objects.none()
         return(Order.objects.filter(user=self.request.user).prefetch_related("items__variant"))
