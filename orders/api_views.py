@@ -35,6 +35,9 @@ class AddToCartAPIView(APIView):
         cart, created=Cart.objects.get_or_create(user=request.user)
         item, created=CartItem.objects.get_or_create(cart=cart, variant=variant)
 
+        if quantity > variant.stock:
+            return Response({"detail": "Not enough stock"}, status=status.HTTP_400_BAD_REQUEST)
+
         if not created:
             item.quantity+=quantity
         else:
@@ -51,7 +54,7 @@ class IncreaseCartItemAPIView(APIView):
         item=get_object_or_404(CartItem, id=item_id, cart__user=request.user)
 
         if item.quantity>=item.variant.stock:
-            return Response({"detail": "Not enoug stock"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Not enough stock"}, status=status.HTTP_400_BAD_REQUEST)
         
         item.quantity+=1
         item.save()
